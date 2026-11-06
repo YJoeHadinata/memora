@@ -16,6 +16,10 @@
   <img src="https://img.shields.io/badge/license-CC%20BY--NC%204.0-purple" alt="License" />
 </p>
 
+<p align="center">
+  <img src="assets/screenshots/overview.png" alt="Memora Dashboard Overview" width="840" />
+</p>
+
 ---
 
 ## Overview
@@ -33,12 +37,20 @@
 - **Unified Memory & Storage Cards**: Overview of Apple Silicon Unified RAM and mounted drive storage volumes, cleanly separating primary user drives from internal APFS helper volumes (`/System/Volumes/VM`, `Preboot`, `Recovery`).
 
 ### 2. Deep Process Manager
+
+<p align="center">
+  <img src="assets/screenshots/processes.png" alt="Memora Process Manager" width="840" />
+</p>
 - **Per-Process Footprint**: Measures true physical memory consumption (`ri_phys_footprint`) via `libproc`.
 - **Architecture Detection**: Real-time badges for **Apple Silicon (Native ARM64)**, **Rosetta 2 (Translated Intel)**, and **Intel (x86_64)**.
 - **Safe Process Termination**: Clean Safe Quit (`SIGTERM`) and confirmed Force Quit (`SIGKILL`) with kernel-level safeguards protecting critical system daemons (`launchd`, `kernel_task`, `WindowServer`, etc.).
 - **Process Inspector Modal**: Detailed drill-down for PID, pageins, disk I/O reads/writes, bundle paths, and one-click "Reveal in Finder".
 
 ### 3. Cleanup & Storage Optimizer
+
+<p align="center">
+  <img src="assets/screenshots/cleanup.png" alt="Memora Cleanup & Storage" width="840" />
+</p>
 - **Large & Old Files Finder**: Uncovers massive forgotten video files, archives, and untouched disk images across `Downloads`, `Documents`, `Movies`, and `Desktop` with filters for category (Archives, Disk Images, Media, Documents), size (>50MB, >100MB, >500MB, >1GB), and age (>1 month, >6 months, >1 year), complete with "Reveal in Finder" and safe "Move to Trash".
 - **macOS Trash (`~/.Trash`)**: Instant calculation of Trash volume and item count, with safe 1-click emptying via confirmation modal.
 - **Leftover Installers**: Automatically detects lingering `.dmg`, `.pkg`, and `.iso` disk packages in `~/Downloads` with individual selection checkboxes.
@@ -51,6 +63,10 @@
 - **Quick System Diagnostics**: 1-click DNS flush (`dscacheutil -flushcache`) and QuickLook thumbnail cache reset (`qlmanage -r cache`).
 
 ### 5. macOS Menu Bar Companion & Smart Alerts
+
+<p align="center">
+  <img src="assets/screenshots/settings.png" alt="Memora Settings & Preferences" width="840" />
+</p>
 - **Native Menu Bar Item**: Real-time RAM status item (`NSStatusItem`) in the top macOS menu bar with a companion dropdown menu for live memory stats, quick RAM purge, Trash emptying, and 1-click dashboard access.
 - **Smart High RAM Alerts**: Native Notification Center banners alerting when any single process spikes above configurable limits (2 GB, 3 GB, 4 GB, 6 GB, 8 GB).
 - **Kernel Pressure Alerts**: Automatic alerts when macOS memory pressure elevates to Warning or Critical.
