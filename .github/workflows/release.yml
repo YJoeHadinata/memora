@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release-macos:
+    name: Package and Publish macOS Release
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run Tests
+        run: cargo test --release
+
+      - name: Build macOS App Bundle & DMG
+        run: ./scripts/package-dmg.sh
+
+      - name: Upload Release Artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.dmg
+            dist/*.sha256
+          draft: false
+          prerelease: false
+          generate_release_notes: true

@@ -1,0 +1,47 @@
+# Rust / Cargo
+/target/
+# Cargo.lock is intentionally tracked for reproducible application builds and CI caching
+# See: https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
+**/*.rs.bk
+*.profraw
+*.profdata
+
+# Build and Packaging Artifacts
+dist/
+build/
+*.dmg
+*.app/
+*.pkg
+*.sha256
+
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon\r
+
+# IDEs & Text Editors
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Logs and Environment
+*.log
+crash.dmp
+.env
+.env.*
+!.env.example
+
+# Local AI & Assistant Rules
+GEMINI.md
+AGENTS.md
+.agents/
+.gemini/
