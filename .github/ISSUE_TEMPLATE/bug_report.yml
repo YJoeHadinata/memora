@@ -1,0 +1,64 @@
+name: Bug Report
+description: Create a report to help us improve Memora
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report an issue!
+  - type: input
+    id: version
+    attributes:
+      label: Memora Version
+      description: What version of Memora are you running? (e.g. v0.1.0)
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: macOS Architecture & Hardware
+      description: Select your Mac hardware platform
+      options:
+        - Apple Silicon (M1 / M2 / M3 / M4)
+        - Intel (x86_64)
+    validations:
+      required: true
+  - type: input
+    id: macos_version
+    attributes:
+      label: macOS Version
+      description: e.g. macOS 14 Sonoma, macOS 15 Sequoia
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions to reproduce the issue.
+      placeholder: |
+        1. Open Memora
+        2. Click on 'Cleanup' tab
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output or Screenshots
+      description: Paste any crash logs or upload relevant screenshots.
+      render: shell
+
