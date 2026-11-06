@@ -9,6 +9,9 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/YJoeHadinata/memora/actions/workflows/ci.yml"><img src="https://github.com/YJoeHadinata/memora/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+  <a href="https://github.com/YJoeHadinata/memora/releases/latest"><img src="https://img.shields.io/github/v/release/YJoeHadinata/memora?logo=github&color=blue" alt="Latest Release" /></a>
+  <a href="https://github.com/YJoeHadinata/memora/releases"><img src="https://img.shields.io/github/downloads/YJoeHadinata/memora/total?color=success&logo=apple" alt="Downloads" /></a>
   <img src="https://img.shields.io/badge/platform-macOS%2012.0%2B-blue?logo=apple" alt="macOS 12+" />
   <img src="https://img.shields.io/badge/arch-Apple%20Silicon%20%7C%20Intel-green" alt="Architecture" />
   <img src="https://img.shields.io/badge/language-Rust%202021-orange?logo=rust" alt="Rust" />
@@ -96,7 +99,21 @@
 
 ## Installation
 
-### Option 1: Direct Download (.dmg)
+### Option 1: Install via Homebrew (Recommended)
+
+Install directly via the official Homebrew Tap:
+
+```bash
+brew install --cask YJoeHadinata/tap/memora
+```
+
+To update when a new version is released:
+
+```bash
+brew upgrade --cask memora
+```
+
+### Option 2: Direct Download (.dmg)
 
 1. Download the latest `Memora-0.1.0.dmg` from the [Releases](https://github.com/YJoeHadinata/memora/releases) page.
 2. Open the `.dmg` file and drag **Memora** into your `/Applications` folder.
@@ -105,7 +122,7 @@
    xattr -cr /Applications/Memora.app
    ```
 
-### Option 2: Build From Source
+### Option 3: Build From Source
 
 ```bash
 # Clone the repository
