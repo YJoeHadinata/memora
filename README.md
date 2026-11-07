@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/arch-Apple%20Silicon%20%7C%20Intel-green" alt="Architecture" />
   <img src="https://img.shields.io/badge/language-Rust%202021-orange?logo=rust" alt="Rust" />
   <img src="https://img.shields.io/badge/GUI-egui%200.37-lightblue" alt="egui" />
-  <img src="https://img.shields.io/badge/license-CC%20BY--NC%204.0-purple" alt="License" />
+  <img src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue" alt="License: GPL-3.0-or-later" />
 </p>
 
 <p align="center">
@@ -44,6 +44,7 @@
 <p align="center">
   <img src="assets/screenshots/processes.png" alt="Memora Process Manager" width="840" />
 </p>
+
 - **Per-Process Footprint**: Measures true physical memory consumption (`ri_phys_footprint`) via `libproc`.
 - **Architecture Detection**: Real-time badges for **Apple Silicon (Native ARM64)**, **Rosetta 2 (Translated Intel)**, and **Intel (x86_64)**.
 - **Safe Process Termination**: Clean Safe Quit (`SIGTERM`) and confirmed Force Quit (`SIGKILL`) with kernel-level safeguards protecting critical system daemons (`launchd`, `kernel_task`, `WindowServer`, etc.).
@@ -54,6 +55,7 @@
 <p align="center">
   <img src="assets/screenshots/cleanup.png" alt="Memora Cleanup & Storage" width="840" />
 </p>
+
 - **Large & Old Files Finder**: Uncovers massive forgotten video files, archives, and untouched disk images across `Downloads`, `Documents`, `Movies`, and `Desktop` with filters for category (Archives, Disk Images, Media, Documents), size (>50MB, >100MB, >500MB, >1GB), and age (>1 month, >6 months, >1 year), complete with "Reveal in Finder" and safe "Move to Trash".
 - **macOS Trash (`~/.Trash`)**: Instant calculation of Trash volume and item count, with safe 1-click emptying via confirmation modal.
 - **Leftover Installers**: Automatically detects lingering `.dmg`, `.pkg`, and `.iso` disk packages in `~/Downloads` with individual selection checkboxes.
@@ -70,6 +72,7 @@
 <p align="center">
   <img src="assets/screenshots/settings.png" alt="Memora Settings & Preferences" width="840" />
 </p>
+
 - **Native Menu Bar Item**: Real-time RAM status item (`NSStatusItem`) in the top macOS menu bar with a companion dropdown menu for live memory stats, quick RAM purge, Trash emptying, and 1-click dashboard access.
 - **Smart High RAM Alerts**: Native Notification Center banners alerting when any single process spikes above configurable limits (2 GB, 3 GB, 4 GB, 6 GB, 8 GB).
 - **Kernel Pressure Alerts**: Automatic alerts when macOS memory pressure elevates to Warning or Critical.
@@ -194,7 +197,7 @@ macOS Mach VM / sysctl / libproc / tmutil
 
 ## License
 
-This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)](LICENSE).
+This project is licensed under the [GNU General Public License v3.0 or later (GPL-3.0-or-later)](LICENSE).
 
-- **Attribution Required:** You must give credit to the original author ([Y. Joe Hadinata](https://github.com/YJoeHadinata)) and link back to this repository.
-- **Non-Commercial Only:** You may **not** sell this software, charge money, or use it for commercial gain without explicit written permission.
+- **Free & Open Source:** You are free to use, run, study, and modify this software for personal or commercial use.
+- **Copyleft Protection:** Any derivative works or modifications distributed by third parties must also be licensed under the GPLv3 with full source code made publicly available. Proprietary re-licensing, closed-source paywalling, or selling this software as a closed commercial product is strictly prohibited.
