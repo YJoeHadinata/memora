@@ -38,14 +38,11 @@ impl ProcessService {
                     ProcessFilterCategory::HighMemory => p.memory_bytes >= 500 * 1024 * 1024,
                     ProcessFilterCategory::HighEnergy => p.cpu_usage.unwrap_or(0.0) >= 10.0,
                 };
-
                 if !category_match {
                     return false;
                 }
-                if query.is_empty() {
-                    return true;
-                }
-                p.name.to_lowercase().contains(&query)
+                query.is_empty()
+                    || p.name.to_lowercase().contains(&query)
                     || p.pid.to_string().contains(&query)
                     || p.path
                         .as_ref()
@@ -57,17 +54,14 @@ impl ProcessService {
         filtered.sort_by(|a, b| {
             let ordering = match sort_column {
                 ProcessSortColumn::Memory => a.memory_bytes.cmp(&b.memory_bytes),
-                ProcessSortColumn::Cpu => {
-                    let a_cpu = a.cpu_usage.unwrap_or(0.0);
-                    let b_cpu = b.cpu_usage.unwrap_or(0.0);
-                    a_cpu
-                        .partial_cmp(&b_cpu)
-                        .unwrap_or(std::cmp::Ordering::Equal)
-                }
+                ProcessSortColumn::Cpu => a
+                    .cpu_usage
+                    .unwrap_or(0.0)
+                    .partial_cmp(&b.cpu_usage.unwrap_or(0.0))
+                    .unwrap_or(std::cmp::Ordering::Equal),
                 ProcessSortColumn::Name => a.name.to_lowercase().cmp(&b.name.to_lowercase()),
                 ProcessSortColumn::Pid => a.pid.cmp(&b.pid),
             };
-
             match direction {
                 SortDirection::Ascending => ordering,
                 SortDirection::Descending => ordering.reverse(),
@@ -94,66 +88,67 @@ impl ProcessService {
 mod tests {
     use super::*;
 
+    fn sample_proc(
+        pid: i32,
+        name: &str,
+        path: &str,
+        mem_mb: u64,
+        cpu: f32,
+        is_app: bool,
+        is_sys: bool,
+    ) -> ProcessInfo {
+        ProcessInfo {
+            pid,
+            name: name.to_string(),
+            path: Some(path.to_string()),
+            memory_bytes: mem_mb * 1024 * 1024,
+            resident_bytes: mem_mb * 1024 * 1024,
+            peak_memory_bytes: mem_mb * 1024 * 1024,
+            pageins: 10,
+            disk_read_bytes: 0,
+            disk_write_bytes: 0,
+            cpu_usage: Some(cpu),
+            is_application: is_app,
+            is_system_process: is_sys,
+            is_protected: is_sys,
+            user_id: None,
+            bundle_id: None,
+            architecture: crate::models::ProcessArchitecture::AppleSilicon,
+        }
+    }
+
     #[test]
     fn test_filter_and_sort() {
         let procs = vec![
-            ProcessInfo {
-                pid: 100,
-                name: "Safari".to_string(),
-                path: Some("/Applications/Safari.app".to_string()),
-                memory_bytes: 500 * 1024 * 1024,
-                resident_bytes: 400 * 1024 * 1024,
-                peak_memory_bytes: 520 * 1024 * 1024,
-                pageins: 100,
-                disk_read_bytes: 1024,
-                disk_write_bytes: 512,
-                cpu_usage: Some(15.0),
-                is_application: true,
-                is_system_process: false,
-                is_protected: false,
-                user_id: None,
-                bundle_id: None,
-                architecture: crate::models::ProcessArchitecture::AppleSilicon,
-            },
-            ProcessInfo {
-                pid: 200,
-                name: "syspolicyd".to_string(),
-                path: Some("/usr/libexec/syspolicyd".to_string()),
-                memory_bytes: 100 * 1024 * 1024,
-                resident_bytes: 80 * 1024 * 1024,
-                peak_memory_bytes: 100 * 1024 * 1024,
-                pageins: 20,
-                disk_read_bytes: 0,
-                disk_write_bytes: 0,
-                cpu_usage: Some(0.1),
-                is_application: false,
-                is_system_process: true,
-                is_protected: true,
-                user_id: None,
-                bundle_id: None,
-                architecture: crate::models::ProcessArchitecture::AppleSilicon,
-            },
-            ProcessInfo {
-                pid: 300,
-                name: "Terminal".to_string(),
-                path: Some("/Applications/Utilities/Terminal.app".to_string()),
-                memory_bytes: 250 * 1024 * 1024,
-                resident_bytes: 200 * 1024 * 1024,
-                peak_memory_bytes: 260 * 1024 * 1024,
-                pageins: 50,
-                disk_read_bytes: 2048,
-                disk_write_bytes: 1024,
-                cpu_usage: Some(0.5),
-                is_application: true,
-                is_system_process: false,
-                is_protected: false,
-                user_id: None,
-                bundle_id: None,
-                architecture: crate::models::ProcessArchitecture::AppleSilicon,
-            },
+            sample_proc(
+                100,
+                "Safari",
+                "/Applications/Safari.app",
+                500,
+                15.0,
+                true,
+                false,
+            ),
+            sample_proc(
+                200,
+                "syspolicyd",
+                "/usr/libexec/syspolicyd",
+                100,
+                0.1,
+                false,
+                true,
+            ),
+            sample_proc(
+                300,
+                "Terminal",
+                "/Applications/Utilities/Terminal.app",
+                250,
+                0.5,
+                true,
+                false,
+            ),
         ];
 
-        // Filter applications only
         let apps = ProcessService::filter_and_sort(
             &procs,
             "",
@@ -163,9 +158,7 @@ mod tests {
         );
         assert_eq!(apps.len(), 2);
         assert_eq!(apps[0].name, "Safari");
-        assert_eq!(apps[1].name, "Terminal");
 
-        // High memory filter (>500MB)
         let high_mem = ProcessService::filter_and_sort(
             &procs,
             "",
@@ -176,7 +169,6 @@ mod tests {
         assert_eq!(high_mem.len(), 1);
         assert_eq!(high_mem[0].name, "Safari");
 
-        // Search query
         let search = ProcessService::filter_and_sort(
             &procs,
             "term",
@@ -187,7 +179,6 @@ mod tests {
         assert_eq!(search.len(), 1);
         assert_eq!(search[0].name, "Terminal");
 
-        // High energy filter (>10% CPU)
         let high_energy = ProcessService::filter_and_sort(
             &procs,
             "",

@@ -60,3 +60,61 @@ pub struct PurgeRamResult {
     pub success: bool,
     pub message: String,
 }
+
+pub const DEV_CACHE_TARGETS: [(&str, &str, &str, &str); 4] = [
+    (
+        "xcode_derived_data",
+        "Xcode DerivedData (Build Cache)",
+        "Library/Developer/Xcode/DerivedData",
+        "Xcode intermediate build artifacts, indices, and module cache",
+    ),
+    (
+        "user_logs",
+        "User Application Logs",
+        "Library/Logs",
+        "Diagnostic crash reports and session traces in ~/Library/Logs",
+    ),
+    (
+        "cargo_cache",
+        "Rust Cargo Package Cache",
+        ".cargo/registry/cache",
+        "Downloaded .crate archive packages in ~/.cargo",
+    ),
+    (
+        "gradle_cache",
+        "Gradle Build Cache",
+        ".gradle/caches",
+        "Downloaded dependencies and build caches in ~/.gradle",
+    ),
+];
+
+pub fn friendly_cache_name(folder_name: &str) -> String {
+    match folder_name {
+        "Google" => "Google Chrome & Updater".to_string(),
+        "Homebrew" => "Homebrew Packages & Downloads".to_string(),
+        "CocoaPods" => "CocoaPods Dependency Cache".to_string(),
+        "Steam" => "Steam Game Assets & Client".to_string(),
+        "colima" => "Colima Container Cache".to_string(),
+        "JNA" => "Java Native Access Temporary Files".to_string(),
+        "JetPackCache" | "JetPackResourceBundles" => "JetBrains IDE Resources".to_string(),
+        "DaVinci Resolve Welcome" => "DaVinci Resolve Assets".to_string(),
+        n if n.starts_with("com.google.Chrome") => "Google Chrome Cache".to_string(),
+        n if n.starts_with("com.spotify.client") => "Spotify Audio & Media Cache".to_string(),
+        n if n.starts_with("com.microsoft.VSCode") => "Visual Studio Code Cache".to_string(),
+        n if n.starts_with("com.tinyspeck.slackmacgap") => "Slack Desktop Cache".to_string(),
+        n if n.starts_with("com.apple.dt.Xcode") => "Xcode Build & Module Cache".to_string(),
+        n if n.starts_with("org.mozilla.firefox") => "Firefox Browser Cache".to_string(),
+        n if n.starts_with("com.brave.Browser") => "Brave Browser Cache".to_string(),
+        n if n.starts_with("com.apple.") => {
+            format!("Apple Service ({})", n.trim_start_matches("com.apple."))
+        }
+        other => other.to_string(),
+    }
+}
+
+pub fn is_safe_cache_to_clean(folder_name: &str) -> bool {
+    const PROTECTED: &str = "CloudKit,FamilyCircle,familycircled,PassKit,GeoServices,\
+com.apple.containermanagerd,com.apple.homed,com.apple.HomeKit,com.apple.Safari,\
+com.apple.Safari.SafeBrowsing";
+    !PROTECTED.split(',').any(|p| p == folder_name)
+}

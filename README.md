@@ -56,6 +56,8 @@
   <img src="assets/screenshots/cleanup.png" alt="Memora Cleanup & Storage" width="840" />
 </p>
 
+- **App Uninstaller & Residuals Cleaner**: Discovers all installed apps and scrubs hidden data across `~/Library/Application Support`, `~/Library/Caches`, `~/Library/Preferences`, `~/Library/Saved Application State`, and `~/Library/Containers`. Features a two-pane inspection view, category badges, and safe one-click Trash moving with system app protection.
+- **Startup & Background Items Manager**: Scans user launch agents (`~/Library/LaunchAgents`), system launch agents (`/Library/LaunchAgents`), and system daemons (`/Library/LaunchDaemons`). Detects live execution states (`Running` with PID, `Idle/Loaded`, or `Disabled`), provides 1-click Enable/Disable toggling for user agents, Finder reveal, and safe Trash removal of orphaned startup plists.
 - **Large & Old Files Finder**: Uncovers massive forgotten video files, archives, and untouched disk images across `Downloads`, `Documents`, `Movies`, and `Desktop` with filters for category (Archives, Disk Images, Media, Documents), size (>50MB, >100MB, >500MB, >1GB), and age (>1 month, >6 months, >1 year), complete with "Reveal in Finder" and safe "Move to Trash".
 - **macOS Trash (`~/.Trash`)**: Instant calculation of Trash volume and item count, with safe 1-click emptying via confirmation modal.
 - **Leftover Installers**: Automatically detects lingering `.dmg`, `.pkg`, and `.iso` disk packages in `~/Downloads` with individual selection checkboxes.
@@ -118,7 +120,7 @@ brew upgrade --cask memora
 
 ### Option 2: Direct Download (.dmg)
 
-1. Download the latest `Memora-0.1.0.dmg` from the [Releases](https://github.com/YJoeHadinata/memora/releases) page.
+1. Download the latest `Memora-0.2.0.dmg` from the [Releases](https://github.com/YJoeHadinata/memora/releases) page.
 2. Open the `.dmg` file and drag **Memora** into your `/Applications` folder.
 3. *First Launch Note*: Since Memora is an open-source, non-notarized build, open it by **Right-Clicking (Control-Click)** on `Memora.app` in `/Applications` and selecting **Open**, or run:
    ```bash
@@ -157,8 +159,8 @@ To package a standalone `.app` bundle and compressed `.dmg` disk image:
 
 Distribution output:
 - `dist/Memora.app`
-- `dist/Memora-0.1.0.dmg`
-- `dist/Memora-0.1.0.dmg.sha256`
+- `dist/Memora-0.2.0.dmg`
+- `dist/Memora-0.2.0.dmg.sha256`
 
 ---
 

@@ -5,7 +5,6 @@ use crate::error::MemoraError;
 use crate::models::{MemoryPressure, MemorySnapshot};
 use crate::system::memory::MemoryCollector;
 
-// Mach host and VM statistics definitions
 const HOST_VM_INFO64: libc::c_int = 4;
 const HOST_VM_INFO64_COUNT: libc::mach_msg_type_number_t = (mem::size_of::<VmStatistics64Data>()
     / mem::size_of::<libc::integer_t>())
@@ -52,18 +51,29 @@ struct XswUsage {
 
 extern "C" {
     fn mach_host_self() -> libc::mach_port_t;
-    fn host_page_size(
-        host: libc::mach_port_t,
-        page_size: *mut libc::vm_size_t,
-    ) -> libc::kern_return_t;
+    fn host_page_size(host: libc::mach_port_t, out: *mut libc::vm_size_t) -> libc::kern_return_t;
     fn host_statistics64(
         host_priv: libc::mach_port_t,
         flavor: libc::c_int,
         host_info_out: *mut libc::c_void,
-        host_info_outCnt: *mut libc::mach_msg_type_number_t,
+        host_info_out_cnt: *mut libc::mach_msg_type_number_t,
     ) -> libc::kern_return_t;
 }
 
+fn sysctl_read<T: Default>(key: &std::ffi::CStr, label: &str) -> Result<T, MemoraError> {
+    let (mut val, mut len) = (T::default(), mem::size_of::<T>());
+    let ptr = &mut val as *mut T as *mut libc::c_void;
+    let ret = unsafe { libc::sysctlbyname(key.as_ptr(), ptr, &mut len, std::ptr::null_mut(), 0) };
+    if ret != 0 {
+        return Err(MemoraError::SysctlError {
+            key: label.to_string(),
+            message: std::io::Error::last_os_error().to_string(),
+        });
+    }
+    Ok(val)
+}
+
+#[derive(Default)]
 pub struct MacosMemoryCollector;
 
 impl MacosMemoryCollector {
@@ -71,166 +81,67 @@ impl MacosMemoryCollector {
         Self
     }
 
-    /// Fetches total physical memory in bytes via sysctl `hw.memsize`.
-    fn get_physical_memory(&self) -> Result<u64, MemoraError> {
-        let mut memsize: u64 = 0;
-        let mut len = mem::size_of::<u64>();
-        let name = c"hw.memsize";
-
-        let ret = unsafe {
-            libc::sysctlbyname(
-                name.as_ptr(),
-                &mut memsize as *mut u64 as *mut libc::c_void,
-                &mut len,
-                std::ptr::null_mut(),
-                0,
-            )
-        };
-
-        if ret != 0 {
-            return Err(MemoraError::SysctlError {
-                key: "hw.memsize".to_string(),
-                message: std::io::Error::last_os_error().to_string(),
-            });
-        }
-
-        Ok(memsize)
-    }
-
-    /// Fetches swap usage via sysctl `vm.swapusage`.
     fn get_swap_usage(&self) -> Result<(u64, u64), MemoraError> {
-        let mut swap = XswUsage::default();
-        let mut len = mem::size_of::<XswUsage>();
-        let name = c"vm.swapusage";
-
-        let ret = unsafe {
-            libc::sysctlbyname(
-                name.as_ptr(),
-                &mut swap as *mut XswUsage as *mut libc::c_void,
-                &mut len,
-                std::ptr::null_mut(),
-                0,
-            )
-        };
-
-        if ret != 0 {
-            return Err(MemoraError::SysctlError {
-                key: "vm.swapusage".to_string(),
-                message: std::io::Error::last_os_error().to_string(),
-            });
-        }
-
+        let swap: XswUsage = sysctl_read(c"vm.swapusage", "vm.swapusage")?;
         Ok((swap.xsu_total, swap.xsu_used))
     }
 
-    /// Fetches macOS memory pressure level via sysctl `kern.memorystatus_vm_pressure_level`.
     fn get_memory_pressure(&self) -> MemoryPressure {
-        let mut level: libc::c_int = 0;
-        let mut len = mem::size_of::<libc::c_int>();
-        let name = c"kern.memorystatus_vm_pressure_level";
-
-        let ret = unsafe {
-            libc::sysctlbyname(
-                name.as_ptr(),
-                &mut level as *mut libc::c_int as *mut libc::c_void,
-                &mut len,
-                std::ptr::null_mut(),
-                0,
-            )
-        };
-
-        if ret != 0 {
-            return MemoryPressure::Unknown;
-        }
-
-        match level {
-            1 => MemoryPressure::Normal,
-            2 => MemoryPressure::Warning,
-            4 => MemoryPressure::Critical,
+        let key = c"kern.memorystatus_vm_pressure_level";
+        match sysctl_read::<libc::c_int>(key, "kern.memorystatus_vm_pressure_level") {
+            Ok(1) => MemoryPressure::Normal,
+            Ok(2) => MemoryPressure::Warning,
+            Ok(4) => MemoryPressure::Critical,
             _ => MemoryPressure::Unknown,
         }
     }
 
-    /// Fetches Mach VM statistics via `host_statistics64`.
     fn get_vm_statistics(&self) -> Result<(VmStatistics64Data, u64), MemoraError> {
         let host = unsafe { mach_host_self() };
-
         let mut page_size: libc::vm_size_t = 0;
-        let kern_ret = unsafe { host_page_size(host, &mut page_size) };
-        if kern_ret != libc::KERN_SUCCESS {
-            return Err(MemoraError::MachError(kern_ret));
+        let kr = unsafe { host_page_size(host, &mut page_size) };
+        if kr != libc::KERN_SUCCESS {
+            return Err(MemoraError::MachError(kr));
         }
 
-        let mut vm_stat = VmStatistics64Data::default();
-        let mut count = HOST_VM_INFO64_COUNT;
-
-        let kern_ret = unsafe {
-            host_statistics64(
-                host,
-                HOST_VM_INFO64,
-                &mut vm_stat as *mut VmStatistics64Data as *mut libc::c_void,
-                &mut count,
-            )
-        };
-
-        if kern_ret != libc::KERN_SUCCESS {
-            return Err(MemoraError::MachError(kern_ret));
+        let (mut vm_stat, mut count) = (VmStatistics64Data::default(), HOST_VM_INFO64_COUNT);
+        let ptr = &mut vm_stat as *mut VmStatistics64Data as *mut libc::c_void;
+        let kr = unsafe { host_statistics64(host, HOST_VM_INFO64, ptr, &mut count) };
+        if kr != libc::KERN_SUCCESS {
+            return Err(MemoraError::MachError(kr));
         }
-
         Ok((vm_stat, page_size as u64))
-    }
-}
-
-impl Default for MacosMemoryCollector {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
 impl MemoryCollector for MacosMemoryCollector {
     fn collect_memory(&self) -> Result<MemorySnapshot, MemoraError> {
-        let total_bytes = self.get_physical_memory()?;
-        let (swap_total, swap_used) = self.get_swap_usage().unwrap_or((0, 0));
+        let total_bytes = sysctl_read::<u64>(c"hw.memsize", "hw.memsize")?;
+        let (swap_total_bytes, swap_used_bytes) = self.get_swap_usage().unwrap_or((0, 0));
         let pressure = self.get_memory_pressure();
-        let (vm_stat, page_size) = self.get_vm_statistics()?;
+        let (vm, ps) = self.get_vm_statistics()?;
 
-        // macOS Activity Monitor calculation:
-        // App Memory = (internal_page_count - purgeable_count) * page_size
-        // Wired Memory = wire_count * page_size
-        // Compressed Memory = compressor_page_count * page_size
-        // Used Memory = App Memory + Wired Memory + Compressed Memory
-        // Cached Files = (purgeable_count + external_page_count) * page_size
-        // Free Memory = free_count * page_size
-        // Available Memory = Free Memory + (reclaimable cache, or Total - Used)
-        let internal_pages = vm_stat.internal_page_count as u64;
-        let purgeable_pages = vm_stat.purgeable_count as u64;
-        let wire_pages = vm_stat.wire_count as u64;
-        let compressor_pages = vm_stat.compressor_page_count as u64;
-        let external_pages = vm_stat.external_page_count as u64;
-        let free_pages = vm_stat.free_count as u64;
-
-        let app_memory_bytes = internal_pages.saturating_sub(purgeable_pages) * page_size;
-        let wired_bytes = wire_pages * page_size;
-        let compressed_bytes = compressor_pages * page_size;
-        let cached_files_bytes = (purgeable_pages + external_pages) * page_size;
-        let purgeable_bytes = purgeable_pages * page_size;
-        let free_bytes = free_pages * page_size;
-
+        let (internal, purgeable) = (vm.internal_page_count as u64, vm.purgeable_count as u64);
+        let app_memory_bytes = internal.saturating_sub(purgeable) * ps;
+        let wired_bytes = (vm.wire_count as u64) * ps;
+        let compressed_bytes = (vm.compressor_page_count as u64) * ps;
+        let cached_files_bytes = (purgeable + vm.external_page_count as u64) * ps;
+        let purgeable_bytes = purgeable * ps;
+        let free_bytes = (vm.free_count as u64) * ps;
         let used_bytes = (app_memory_bytes + wired_bytes + compressed_bytes).min(total_bytes);
-        let available_bytes = total_bytes.saturating_sub(used_bytes);
 
         Ok(MemorySnapshot {
             total_bytes,
             used_bytes,
-            available_bytes,
+            available_bytes: total_bytes.saturating_sub(used_bytes),
             app_memory_bytes,
             wired_bytes,
             compressed_bytes,
             cached_files_bytes,
             purgeable_bytes,
             free_bytes,
-            swap_total_bytes: swap_total,
-            swap_used_bytes: swap_used,
+            swap_total_bytes,
+            swap_used_bytes,
             pressure,
             timestamp: SystemTime::now(),
         })
@@ -243,21 +154,8 @@ mod tests {
 
     #[test]
     fn test_macos_memory_collection() {
-        let collector = MacosMemoryCollector::new();
-        let snapshot = collector
-            .collect_memory()
-            .expect("Should collect macOS memory");
-
-        assert!(snapshot.total_bytes > 0, "Total RAM should be > 0");
-        assert!(snapshot.used_bytes > 0, "Used RAM should be > 0");
-        assert!(
-            snapshot.used_bytes <= snapshot.total_bytes,
-            "Used RAM cannot exceed total"
-        );
-        assert_ne!(
-            snapshot.pressure,
-            MemoryPressure::Unknown,
-            "Pressure should be resolved"
-        );
+        let snap = MacosMemoryCollector::new().collect_memory().unwrap();
+        assert!(snap.total_bytes > 0 && snap.used_bytes <= snap.total_bytes);
+        assert_ne!(snap.pressure, MemoryPressure::Unknown);
     }
 }

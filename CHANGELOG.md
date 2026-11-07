@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-07
+
+### Added
+- **App Uninstaller & Residuals Cleaner**:
+  - Full application scanner across `/Applications`, `~/Applications`, and `/System/Applications`.
+  - Automatic `CFBundleIdentifier`, `CFBundleDisplayName`, and version resolution from `.app` bundles via fast in-memory XML plist parser with `plutil` fallback.
+  - Deep residual scanner inspecting `~/Library/Application Support`, `~/Library/Caches`, `~/Library/Preferences`, `~/Library/Saved Application State`, `~/Library/Containers`, `~/Library/HTTPStorages`, `~/Library/WebKit`, and `~/Library/Logs`.
+  - Interactive two-pane interface: search and select applications sorted by total footprint on the left, inspect detailed file-by-file breakdown with category pills on the right.
+  - Safe one-click uninstalling moving bundles and leftovers directly to macOS Trash via AppleScript Finder integration with confirmation dialog.
+  - System application safeguards preventing accidental deletion of native macOS utilities and protected system apps.
+- **Startup & Background Services Manager (LaunchAgents & LaunchDaemons)**:
+  - Comprehensive scan across user launch agents (`~/Library/LaunchAgents`), system-wide launch agents (`/Library/LaunchAgents`), and root system daemons (`/Library/LaunchDaemons`).
+  - Real-time `launchctl` session synchronization to detect active daemon execution state (Running with PID, Loaded/Idle, Disabled, or Not Loaded).
+  - Reverse-DNS service label resolution and friendly display name mapping (Google Keystone, Chrome Updater, Steam Clean, PostgreSQL, Cloudflare WARP, Spotify, etc.).
+  - Interactive status controls: one-click Disable/Enable toggle for user launch agents via safe `.plist.disabled` renaming and `launchctl` loading.
+  - Safe removal of orphaned or unwanted background service plists to macOS Trash with confirmation dialog.
+  - Quick "Finder" reveal button to inspect service plists in native macOS Finder.
+  - Instant filtering by status (All, Running Only, User Agents, System Daemons) and keyword search.
+
+### Changed
+- **Modular Architecture & Code Smell Elimination**:
+  - Refactored and decomposed all oversized modules (`app`, `ui/caches`, `ui/dashboard`, `ui/processes`, `ui/helpers`, `system/macos/process`, `system/macos/menu_bar`) so every Rust source file in `src/` is strictly `<= 200` lines.
+  - Centralized duplicated filesystem sizing, Finder reveal, macOS Trash moving, and subprocess helpers into `src/utils/fs_ops.rs`.
+  - Added fast in-memory XML `<key>` plist parser in `src/utils/plist.rs` (eliminating hundreds of `plutil` subprocess spawns during app and startup scanning) and per-PID binary architecture caching (`arch_cache`) in `MacosProcessCollector`.
+  - Dynamic version badge resolution via `env!("CARGO_PKG_VERSION")` in Settings and Keyboard Shortcuts modals.
+- Updated project licensing to **GNU General Public License v3.0 or later (GPL-3.0-or-later)**.
+- Fixed layout overlap in Storage Optimizer cards by implementing proportional container allocation and automatic text wrapping.
+- Improved row height and vertical padding in the App Uninstaller list, eliminating selection box clipping.
+
 ## [0.1.0] - 2026-11-07
 
 ### Added
