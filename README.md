@@ -36,6 +36,7 @@
 ### 1. Memory Overview & Live Telemetry
 - **Activity Monitor Reconciliation**: Computes App Memory, Wired, Compressed, Cached Files, and Free memory matching exact XNU Mach VM formulas.
 - **Kernel Memory Pressure**: Real-time Darwin kernel pressure level (`Normal`, `Warning`, `Critical`) with color-coded status badges.
+- **Hardware Temperature & Thermal Telemetry**: Real-time Apple Silicon SoC die and SSD NAND temperature sensor monitoring via native Darwin `IOHIDEventSystemClient` with `NSProcessInfo` thermal pressure state tracking.
 - **Interactive Live History**: High-resolution memory timeline plotting with zoom presets (`All`, `1m`, `3m`) and pause/resume capability.
 - **Unified Memory & Storage Cards**: Overview of Apple Silicon Unified RAM and mounted drive storage volumes, cleanly separating primary user drives from internal APFS helper volumes (`/System/Volumes/VM`, `Preboot`, `Recovery`).
 
@@ -76,6 +77,7 @@
 </p>
 
 - **Native Menu Bar Item**: Real-time RAM status item (`NSStatusItem`) in the top macOS menu bar with a companion dropdown menu for live memory stats, quick RAM purge, Trash emptying, and 1-click dashboard access.
+- **Background Menu Bar Updates**: Fully asynchronous Grand Central Dispatch (`dispatch_async_f` on main run loop) updates keep Menu Bar telemetry refreshing continuously even when the dashboard window is closed or hidden.
 - **Smart High RAM Alerts**: Native Notification Center banners alerting when any single process spikes above configurable limits (2 GB, 3 GB, 4 GB, 6 GB, 8 GB).
 - **Kernel Pressure Alerts**: Automatic alerts when macOS memory pressure elevates to Warning or Critical.
 - **Energy Hogs & CPU Impact**: Immediate identification of battery drainers with dedicated filter and color-coded CPU usage indicators.
@@ -120,7 +122,7 @@ brew upgrade --cask memora
 
 ### Option 2: Direct Download (.dmg)
 
-1. Download the latest `Memora-0.2.0.dmg` from the [Releases](https://github.com/YJoeHadinata/memora/releases) page.
+1. Download the latest `Memora-0.3.0.dmg` from the [Releases](https://github.com/YJoeHadinata/memora/releases) page.
 2. Open the `.dmg` file and drag **Memora** into your `/Applications` folder.
 3. *First Launch Note*: Since Memora is an open-source, non-notarized build, open it by **Right-Clicking (Control-Click)** on `Memora.app` in `/Applications` and selecting **Open**, or run:
    ```bash
@@ -159,8 +161,8 @@ To package a standalone `.app` bundle and compressed `.dmg` disk image:
 
 Distribution output:
 - `dist/Memora.app`
-- `dist/Memora-0.2.0.dmg`
-- `dist/Memora-0.2.0.dmg.sha256`
+- `dist/Memora-0.3.0.dmg`
+- `dist/Memora-0.3.0.dmg.sha256`
 
 ---
 

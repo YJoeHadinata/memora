@@ -5,7 +5,6 @@ use egui::{vec2, Color32, CornerRadius, RichText, Stroke};
 
 use crate::app::{AppTab, MemoraApp};
 use crate::config::ThemePreference;
-use crate::system::macos::MacosMenuBar;
 use crate::ui::components::render_pressure_badge;
 use crate::ui::{paint_theme_icon, render_app_logo, AppTheme};
 use crate::utils::format::format_bytes;
@@ -30,15 +29,6 @@ impl eframe::App for MemoraApp {
                 .send_viewport_cmd(egui::ViewportCommand::Visible(true));
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::Focus);
             self.is_window_visible.store(true, Ordering::Relaxed);
-        }
-
-        #[cfg(target_os = "macos")]
-        if self.config.show_menu_bar && self.menu_bar.is_none() {
-            self.menu_bar = MacosMenuBar::new();
-            if let (Some(ref mut bar), Some(ref snap)) = (&mut self.menu_bar, &self.latest_snapshot)
-            {
-                bar.update(snap, self.config.menu_bar_display_mode);
-            }
         }
 
         self.check_background_messages();
@@ -161,6 +151,30 @@ impl MemoraApp {
                                     format_bytes(snap.total_bytes)
                                 );
                                 ui.label(RichText::new(txt).size(11.5).color(theme.text_secondary));
+                            }
+                        }
+                        if let Some(ref th) = self.latest_thermal {
+                            if let Some(temp) = th.primary_temp() {
+                                ui.add_space(10.0);
+                                let tc = if temp >= 85.0 {
+                                    theme.critical_color
+                                } else if temp >= 72.0 {
+                                    theme.warning_color
+                                } else {
+                                    theme.normal_color
+                                };
+                                let h = format!(
+                                    "Thermal State: {}\n{}",
+                                    th.thermal_state.label(),
+                                    th.temp_summary()
+                                );
+                                ui.label(
+                                    RichText::new(format!("{:.1}°C", temp))
+                                        .size(11.5)
+                                        .strong()
+                                        .color(tc),
+                                )
+                                .on_hover_text(h);
                             }
                         }
                     });

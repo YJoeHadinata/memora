@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-13
+
+### Added
+- **Hardware Temperature & Thermal Telemetry**:
+  - Real-time Apple Silicon SoC die temperature monitoring (average & peak core temperatures) via native `IOHIDEventSystemClient` without root privileges or external dependencies.
+  - Flash storage (SSD NAND) temperature sensor tracking.
+  - System-wide thermal throttling pressure state detection (`Nominal`, `Fair`, `Serious`, `Critical`) via `NSProcessInfo.thermalState`.
+  - Dedicated "Thermal & Temperature Telemetry" card on the Overview dashboard with dynamic color-coded thermal gauge bar and individual active sensor chips.
+  - Live temperature indicator badge in the window header bar and synchronized temperature reading in the macOS Menu Bar companion menu.
+
+### Fixed
+- **Live macOS Menu Bar Updates While Window Closed**:
+  - Dispatched `NSStatusItem` memory telemetry updates directly onto the macOS main thread run loop via Grand Central Dispatch (`dispatch_async_f` on `_dispatch_main_q`) from the background polling thread so the Menu Bar continues updating every cycle even when the dashboard window is closed/hidden (`ViewportCommand::Visible(false)`).
+  - Registered `applicationShouldHandleReopen:hasVisibleWindows:` on the `NSApplication` delegate so clicking the Memora Dock icon while the window is closed reopens the dashboard window.
+  - Added immediate Menu Bar telemetry refresh after running **Purge RAM Cache** from the Menu Bar menu.
+
 ## [0.2.0] - 2026-11-07
 
 ### Added

@@ -9,19 +9,19 @@ impl MemoraApp {
                 BackgroundMessage::MetricsUpdated {
                     snapshot,
                     storage,
+                    thermal,
                     processes,
                 } => {
                     if !self.is_history_paused {
                         self.history_service.record(&snapshot);
                     }
-                    #[cfg(target_os = "macos")]
-                    if let Some(ref mut bar) = self.menu_bar {
-                        bar.update(&snapshot, self.config.menu_bar_display_mode);
-                    }
                     self.check_alerts(&snapshot, &processes);
                     self.latest_snapshot = Some(snapshot);
                     self.latest_storage = Some(*storage);
-                    self.processes = processes;
+                    self.latest_thermal = Some(*thermal);
+                    if !processes.is_empty() {
+                        self.processes = processes;
+                    }
                 }
                 BackgroundMessage::CollectionError(err) => self.set_status(err, true),
                 BackgroundMessage::StorageJunkScanned(report) => {

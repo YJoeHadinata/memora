@@ -1,10 +1,11 @@
 mod chart;
 mod sections;
+mod thermal;
 mod volumes;
 
 use egui::{vec2, RichText, ScrollArea, Ui};
 
-use crate::models::{MemorySnapshot, ProcessInfo, StorageSnapshot};
+use crate::models::{MemorySnapshot, ProcessInfo, StorageSnapshot, ThermalSnapshot};
 use crate::services::HistoryService;
 use crate::ui::components::MetricCard;
 use crate::ui::theme::AppTheme;
@@ -12,6 +13,7 @@ use crate::utils::format::{format_bytes, format_percent};
 
 use self::chart::{render_history_chart_card, render_pressure_banner};
 use self::sections::{render_composition_card, render_header, render_top_consumers_card};
+use self::thermal::render_thermal_card;
 use self::volumes::render_storage_volumes_card;
 
 pub enum DashboardAction {
@@ -21,10 +23,12 @@ pub enum DashboardAction {
     NavigateToCaches,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn render_dashboard(
     ui: &mut Ui,
     snapshot: Option<&MemorySnapshot>,
     storage: Option<&StorageSnapshot>,
+    thermal: Option<&ThermalSnapshot>,
     history_svc: &HistoryService,
     top_processes: &[ProcessInfo],
     is_history_paused: &mut bool,
@@ -58,6 +62,12 @@ pub fn render_dashboard(
             ui.add_space(14.0);
             render_metric_cards(ui, snap, storage, avail_width, theme);
             ui.add_space(18.0);
+
+            if let Some(th) = thermal {
+                render_thermal_card(ui, th, theme);
+                ui.add_space(18.0);
+            }
+
             render_composition_card(ui, snap, &mut action, theme);
             ui.add_space(18.0);
 

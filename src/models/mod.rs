@@ -7,11 +7,13 @@ pub mod process;
 pub mod startup_item;
 pub mod storage;
 pub mod storage_clean;
+pub mod thermal;
 
 pub use app_uninstaller::{
     AppLeftoverItem, AppLeftoverKind, AppUninstallScanResult, InstalledAppItem,
 };
 pub use startup_item::{StartupItem, StartupItemKind, StartupItemStatus, StartupScanResult};
+pub use thermal::{SensorReading, ThermalPressureState, ThermalSnapshot};
 
 pub use cache::{CacheItem, CacheScanResult, PurgeRamResult};
 pub use history::{HistoryBuffer, HistoryPoint};

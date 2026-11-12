@@ -5,7 +5,6 @@ use egui::{RichText, Stroke};
 
 use crate::app::{AppTab, BackgroundMessage, MemoraApp};
 use crate::services::{CacheService, ProcessService, StartupService, StorageCleanService};
-use crate::system::macos::MacosMenuBar;
 use crate::ui::components::ConfirmDialogState;
 use crate::ui::{
     render_caches, render_dashboard, render_processes, render_settings, AppTheme, DashboardAction,
@@ -63,6 +62,7 @@ impl MemoraApp {
                         ui,
                         self.latest_snapshot.as_ref(),
                         self.latest_storage.as_ref(),
+                        self.latest_thermal.as_ref(),
                         &self.history_service,
                         &self.processes,
                         &mut self.is_history_paused,
@@ -123,18 +123,10 @@ impl MemoraApp {
                     if self.config.show_menu_bar != prev.show_menu_bar
                         || self.config.menu_bar_display_mode != prev.menu_bar_display_mode
                     {
-                        if self.config.show_menu_bar {
-                            if self.menu_bar.is_none() {
-                                self.menu_bar = MacosMenuBar::new();
-                            }
-                            if let (Some(ref mut bar), Some(ref snap)) =
-                                (&mut self.menu_bar, &self.latest_snapshot)
-                            {
-                                bar.update(snap, self.config.menu_bar_display_mode);
-                            }
-                        } else {
-                            self.menu_bar = None;
-                        }
+                        crate::system::macos::menu_bar::sync_menu_bar_config(
+                            self.config.show_menu_bar,
+                            self.config.menu_bar_display_mode,
+                        );
                     }
                     if self.config != prev {
                         let _ = self.config.save();

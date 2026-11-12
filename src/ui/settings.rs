@@ -92,18 +92,18 @@ fn render_monitoring_card(ui: &mut Ui, config: &mut AppConfig, theme: &AppTheme)
 
         if config.show_menu_bar {
             row_sep(ui);
-            let sub = "Choose whether to show RAM chip icon, numeric usage, or both";
+            let sub = "Choose whether to show RAM chip icon, numeric usage with temperature, or minimal icon";
             setting_row(ui, "Menu Bar Display Style", sub, theme, |ui| {
                 let cur = match config.menu_bar_display_mode {
-                    MenuBarDisplayMode::IconAndUsage => "RAM Icon & Usage",
+                    MenuBarDisplayMode::IconAndUsage => "RAM Icon, Usage & Temp",
                     MenuBarDisplayMode::IconOnly => "RAM Icon Only",
-                    MenuBarDisplayMode::UsageOnly => "Usage Value Only",
+                    MenuBarDisplayMode::UsageOnly => "Usage & Temp Only",
                 };
                 combo(ui, "menu_bar_style_combo", cur, |ui| {
                     let opts = [
                         (
                             MenuBarDisplayMode::IconAndUsage,
-                            "RAM Icon & Usage (e.g. 9.1 GB)",
+                            "RAM Icon, Usage & Temp (e.g. 9.1 GB • 52°C)",
                         ),
                         (
                             MenuBarDisplayMode::IconOnly,
@@ -111,7 +111,7 @@ fn render_monitoring_card(ui: &mut Ui, config: &mut AppConfig, theme: &AppTheme)
                         ),
                         (
                             MenuBarDisplayMode::UsageOnly,
-                            "Usage Value Only (e.g. 9.1 GB)",
+                            "Usage & Temp Only (e.g. 9.1 GB • 52°C)",
                         ),
                     ];
                     for (mode, lbl) in opts {

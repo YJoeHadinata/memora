@@ -7,6 +7,7 @@ pub mod process_service;
 pub mod startup_service;
 pub mod storage_clean_service;
 pub mod storage_service;
+pub mod thermal_service;
 
 pub use app_uninstaller_service::AppUninstallService;
 pub use cache_service::CacheService;
@@ -17,3 +18,4 @@ pub use process_service::ProcessService;
 pub use startup_service::StartupService;
 pub use storage_clean_service::StorageCleanService;
 pub use storage_service::StorageService;
+pub use thermal_service::ThermalService;

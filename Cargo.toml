@@ -1,6 +1,6 @@
 [package]
 name = "memora"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["Y. Joe Hadinata <https://github.com/YJoeHadinata>"]
 description = "Native macOS memory telemetry, process energy monitor, storage optimizer, and menu bar companion."
